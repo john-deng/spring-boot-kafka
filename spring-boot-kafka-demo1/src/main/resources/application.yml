@@ -1,0 +1,12 @@
+logging:
+  level: debug
+
+kafka:
+  topic:
+    producer: demo1.to.demo2
+    consumer: demo2.to.demo1
+  broker:
+    address: localhost:9092
+  zookeeper:
+    connect: localhost:2181
+  messageKey: si.key
