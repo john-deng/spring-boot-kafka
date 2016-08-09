@@ -1,5 +1,6 @@
-package cn.vpclub;
+package cn.vpclub.spring.boot.kafka.starter;
 
+import cn.vpclub.spring.boot.kafka.demo2.Application;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -9,7 +10,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Application.class)
 @WebAppConfiguration
-public class DemoApplicationTests {
+public class ApplicationTests {
 
 	@Test
 	public void contextLoads() {

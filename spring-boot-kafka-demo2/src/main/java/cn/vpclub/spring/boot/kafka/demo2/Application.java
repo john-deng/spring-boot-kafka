@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package cn.vpclub;
+package cn.vpclub.spring.boot.kafka.demo2;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.PollableChannel;
+import org.springframework.messaging.support.GenericMessage;
 
 /**
  * @author Gary Russell
@@ -34,11 +36,18 @@ public class Application {
                 .web(false)
                 .run(args);
 
+        MessageChannel toKafka = context.getBean("toKafka", MessageChannel.class);
         PollableChannel receiver = context.getBean("fromKafka", PollableChannel.class);
         Message<?> received = receiver.receive(10000);
-        while (received != null) {
-            System.out.println("received: " + received);
-            received = receiver.receive(10000);
+        for (int i = 0; i < 100000; i++) {
+            if (null != received) {
+                System.out.println("received: " + received);
+
+                // send reply to demo1
+                toKafka.send(new GenericMessage<String>("replied from demo2: " + received.getPayload().toString()));
+            }
+
+            received = receiver.receive(100);
         }
 
         context.close();

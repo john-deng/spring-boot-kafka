@@ -27,6 +27,7 @@
 	</properties>
 
 	<modules>
+        <module>spring-boot-kafka-starter</module>
         <module>spring-boot-kafka-demo1</module>
         <module>spring-boot-kafka-demo2</module>
     </modules>

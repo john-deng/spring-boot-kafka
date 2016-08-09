@@ -2,11 +2,10 @@ logging:
   level: debug
 
 kafka:
-  topic:
+  broker: localhost:9092
+  zookeeper: localhost:2181
+  key: si.key
+  group: si.group
+  topics:
     producer: demo1.to.demo2
     consumer: demo2.to.demo1
-  broker:
-    address: localhost:9092
-  zookeeper:
-    connect: localhost:2181
-  messageKey: si.key
