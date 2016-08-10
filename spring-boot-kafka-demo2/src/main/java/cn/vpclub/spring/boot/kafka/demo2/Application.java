@@ -16,13 +16,14 @@
 
 package cn.vpclub.spring.boot.kafka.demo2;
 
+import cn.vpclub.spring.boot.kafka.starter.MessageQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.PollableChannel;
-import org.springframework.messaging.support.GenericMessage;
+
+import static org.apache.kafka.common.utils.Utils.sleep;
 
 /**
  * @author John Deng
@@ -30,24 +31,24 @@ import org.springframework.messaging.support.GenericMessage;
  */
 @SpringBootApplication
 public class Application {
+
+    static Logger logger = LoggerFactory.getLogger(Application.class);
+
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext context
                 = new SpringApplicationBuilder(Application.class)
                 .web(false)
                 .run(args);
 
-        MessageChannel toKafka = context.getBean("toKafka", MessageChannel.class);
-        PollableChannel receiver = context.getBean("fromKafka", PollableChannel.class);
-        Message<?> received = receiver.receive(10000);
-        for (int i = 0; i < 100000; i++) {
-            if (null != received) {
-                System.out.println("received: " + received);
+        MessageQueue kafkaMessageHandler = new MessageQueue(context);
+        for (int i = 0; i < 10000; i++) {
+            String response = kafkaMessageHandler.receive(1000);
+            kafkaMessageHandler.send("replied: " + response);
 
-                // send reply to demo1
-                toKafka.send(new GenericMessage<String>("replied from demo2: " + received.getPayload().toString()));
-            }
+            logger.info("received: " + response);
+            logger.info("replied: " + response);
 
-            received = receiver.receive(100);
+            sleep(100L);
         }
 
         context.close();

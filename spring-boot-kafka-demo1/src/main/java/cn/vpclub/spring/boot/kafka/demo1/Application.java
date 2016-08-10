@@ -16,13 +16,12 @@
 
 package cn.vpclub.spring.boot.kafka.demo1;
 
+import cn.vpclub.spring.boot.kafka.starter.MessageQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.PollableChannel;
-import org.springframework.messaging.support.GenericMessage;
 
 import static org.apache.kafka.common.utils.Utils.sleep;
 
@@ -32,25 +31,24 @@ import static org.apache.kafka.common.utils.Utils.sleep;
  */
 @SpringBootApplication
 public class Application {
+
+    static Logger logger = LoggerFactory.getLogger(Application.class);
+
     public static void main(String[] args) throws Exception {
         ConfigurableApplicationContext context
                 = new SpringApplicationBuilder(Application.class)
                 .web(false)
                 .run(args);
-        MessageChannel toKafka = context.getBean("toKafka", MessageChannel.class);
-        PollableChannel receiver = context.getBean("fromKafka", PollableChannel.class);
-        for (int i = 0; i < 10000; i++) {
-            String message = "the message from demo1 to demo2, count: " + i;
-            toKafka.send(new GenericMessage<String>(message));
-            System.out.println("sent: " + message);
-            sleep(500L);
 
-            Message<?> received = receiver.receive(100);
-            if (null != received) {
-                System.out.println("received reply from demo2: " + received);
-                sleep(500L);
-            }
+        MessageQueue mq = new MessageQueue(context);
+        for (int i = 0; i < 10000; i++) {
+            String message = "the message from demo1 to kafka, count: " + i;
+            String response = mq.send(message, 1000);
+            logger.info("sent: " + message);
+            logger.info("received: " + response);
+            sleep(100L);
         }
+
         context.close();
         System.exit(0);
     }

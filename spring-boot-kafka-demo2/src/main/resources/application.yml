@@ -1,6 +1,3 @@
-logging:
-  level: debug
-
 
 kafka:
   broker: localhost:9092
@@ -8,5 +5,5 @@ kafka:
   key: si.key
   group: si.group
   topics:
-    producer: demo2.to.demo1
-    consumer: demo1.to.demo2
+    producer: demo2.to.kafka
+    consumer: demo1.to.kafka

@@ -31,7 +31,8 @@ public class KafkaConsumerAutoConfiguration {
 
     @Bean
     public KafkaMessageListenerContainer<String, String> container() throws Exception {
-        return new KafkaMessageListenerContainer<>(consumerFactory(),
+        return new KafkaMessageListenerContainer<>(
+                consumerFactory(),
                 new ContainerProperties(new TopicPartitionInitialOffset(this.kafkaProperties.getTopics().getConsumer(), 0)));
     }
 
@@ -49,8 +50,7 @@ public class KafkaConsumerAutoConfiguration {
     }
 
     @Bean
-    public KafkaMessageDrivenChannelAdapter<String, String>
-    adapter(KafkaMessageListenerContainer<String, String> container) {
+    public KafkaMessageDrivenChannelAdapter<String, String> adapter(KafkaMessageListenerContainer<String, String> container) {
         KafkaMessageDrivenChannelAdapter<String, String> kafkaMessageDrivenChannelAdapter =
                 new KafkaMessageDrivenChannelAdapter<String, String>(container);
         kafkaMessageDrivenChannelAdapter.setOutputChannel(fromKafka());
