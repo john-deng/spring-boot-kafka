@@ -30,12 +30,8 @@ public class MessageQueue {
         String response = null;
 
         sender.send(new GenericMessage<String>(message));
-//        System.out.println("sent: " + message);
         if (0 != timeout) {
             response = receive(timeout);
-//            if (null != response) {
-//                System.out.println("response: " + response);
-//            }
         }
 
         return response;
@@ -50,7 +46,6 @@ public class MessageQueue {
         Message<?> received = receiver.receive(timeout);
         if (null != received) {
             String response = (String)received.getPayload();
-//            System.out.println("received: " + response);
             return response;
         }
 
