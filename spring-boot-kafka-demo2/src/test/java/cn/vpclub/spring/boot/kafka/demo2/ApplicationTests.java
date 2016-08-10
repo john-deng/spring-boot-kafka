@@ -1,6 +1,6 @@
-package cn.vpclub.spring.boot.kafka.starter;
+package cn.vpclub.spring.boot.kafka.demo2;
 
-import cn.vpclub.spring.boot.kafka.demo1.Application;
+import cn.vpclub.spring.boot.kafka.demo2.Application;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.web.WebAppConfiguration;

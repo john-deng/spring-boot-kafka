@@ -1,4 +1,4 @@
-package cn.vpclub.spring.boot.kafka.starter;
+package cn.vpclub.spring.boot.kafka.autoconfigure;
 
 import kafka.admin.AdminUtils;
 import kafka.common.TopicExistsException;

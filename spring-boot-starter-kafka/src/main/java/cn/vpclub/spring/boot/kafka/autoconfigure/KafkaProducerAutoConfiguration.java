@@ -1,4 +1,4 @@
-package cn.vpclub.spring.boot.kafka.starter;
+package cn.vpclub.spring.boot.kafka.autoconfigure;
 
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;

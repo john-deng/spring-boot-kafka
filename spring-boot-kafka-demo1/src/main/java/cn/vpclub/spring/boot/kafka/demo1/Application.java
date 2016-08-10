@@ -16,7 +16,7 @@
 
 package cn.vpclub.spring.boot.kafka.demo1;
 
-import cn.vpclub.spring.boot.kafka.starter.MessageQueue;
+import cn.vpclub.spring.boot.kafka.utils.KafkaMessageQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -40,12 +40,15 @@ public class Application {
                 .web(false)
                 .run(args);
 
-        MessageQueue mq = new MessageQueue(context);
+        KafkaMessageQueue mq = new KafkaMessageQueue(context);
+
         for (int i = 0; i < 10000; i++) {
             String message = "the message from demo1 to kafka, count: " + i;
             String response = mq.send(message, 1000);
             logger.info("sent: " + message);
-            logger.info("received: " + response);
+            if (null != response) {
+                logger.info("received: " + response);
+            }
             sleep(100L);
         }
 
