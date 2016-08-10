@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * KafkaProducerAutoConfiguration
  * Created by johnd on 8/9/16.
  */
 

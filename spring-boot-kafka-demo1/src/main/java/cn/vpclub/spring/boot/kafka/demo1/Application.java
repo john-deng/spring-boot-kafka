@@ -27,7 +27,7 @@ import org.springframework.messaging.support.GenericMessage;
 import static org.apache.kafka.common.utils.Utils.sleep;
 
 /**
- * @author Gary Russell
+ * @author John Deng
  * @since 4.2
  */
 @SpringBootApplication
