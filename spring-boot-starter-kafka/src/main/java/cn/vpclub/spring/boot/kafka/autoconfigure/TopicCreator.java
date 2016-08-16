@@ -3,7 +3,6 @@ package cn.vpclub.spring.boot.kafka.autoconfigure;
 import kafka.admin.AdminUtils;
 import kafka.common.TopicExistsException;
 import kafka.utils.ZKStringSerializer$;
-import kafka.utils.ZkUtils;
 import org.I0Itec.zkclient.ZkClient;
 import org.springframework.context.SmartLifecycle;
 
@@ -30,13 +29,11 @@ public class TopicCreator implements SmartLifecycle {
 
     @Override
     public void start() {
-        ZkUtils zkUtils = new ZkUtils(new ZkClient(this.zkConnect, 6000, 6000,
-                ZKStringSerializer$.MODULE$), null, false);
+        ZkClient client = new ZkClient(this.zkConnect, 10000, 10000, ZKStringSerializer$.MODULE$);
         try {
-            AdminUtils.createTopic(zkUtils, topic, 1, 1, new Properties());
+            AdminUtils.createTopic(client, this.topic, 1, 1, new Properties());
         }
         catch (TopicExistsException e) {
-            // no-op
         }
         this.running = true;
     }

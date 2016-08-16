@@ -1,4 +1,4 @@
-package cn.vpclub.spring.boot.kafka.demo2;
+package cn.vpclub.spring.boot.kafka.demo3;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

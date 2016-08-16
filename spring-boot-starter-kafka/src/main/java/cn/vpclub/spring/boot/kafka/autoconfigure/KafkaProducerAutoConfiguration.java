@@ -8,14 +8,20 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.expression.common.LiteralExpression;
 import org.springframework.integration.annotation.ServiceActivator;
+import org.springframework.integration.kafka.core.BrokerAddress;
+import org.springframework.integration.kafka.core.BrokerAddressListConfiguration;
+import org.springframework.integration.kafka.core.ConnectionFactory;
+import org.springframework.integration.kafka.core.DefaultConnectionFactory;
 import org.springframework.integration.kafka.outbound.KafkaProducerMessageHandler;
-import org.springframework.kafka.core.DefaultKafkaProducerFactory;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.integration.kafka.support.KafkaProducerContext;
+import org.springframework.integration.kafka.support.ProducerConfiguration;
+import org.springframework.integration.kafka.support.ProducerFactoryBean;
+import org.springframework.integration.kafka.support.ProducerMetadata;
 import org.springframework.messaging.MessageHandler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * KafkaProducerAutoConfiguration
@@ -31,36 +37,28 @@ public class KafkaProducerAutoConfiguration {
     @Autowired
     private KafkaProperties kafkaProperties;
 
-    @ServiceActivator(inputChannel = "toKafka")
     @Bean
-    public MessageHandler handler() throws Exception {
-        KafkaProducerMessageHandler<String, String> handler =
-                new KafkaProducerMessageHandler<String, String>(kafkaTemplate());
-        handler.setTopicExpression(new LiteralExpression(this.kafkaProperties.getTopics().getProducer()));
-        handler.setMessageKeyExpression(new LiteralExpression(this.kafkaProperties.getKey()));
-        return handler;
-    }
+    public KafkaProducerContext producerContext() throws Exception {
 
-    @Bean
-    public KafkaTemplate<String, String> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
-    }
+        KafkaProducerContext kafkaProducerContext = new KafkaProducerContext();
+        Map<String, ProducerConfiguration<?, ?>> producerConfigurationMap = new HashMap<>();
 
-    @Bean
-    public ProducerFactory<String, String> producerFactory() {
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, this.kafkaProperties.getBroker());
-        props.put(ProducerConfig.RETRIES_CONFIG, 0);
-        props.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384);
-        props.put(ProducerConfig.LINGER_MS_CONFIG, 1);
-        props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        return new DefaultKafkaProducerFactory<>(props);
-    }
+        for (String topic: this.kafkaProperties.getTopics().getProducers()) {
+            TopicCreator topicCreator = new TopicCreator(topic, this.kafkaProperties.getZookeeper());
 
-    @Bean
-    public TopicCreator topicCreator() {
-        return new TopicCreator(this.kafkaProperties.getTopics().getProducer(), this.kafkaProperties.getZookeeper());
+            ProducerMetadata<String, String> producerMetadata = new ProducerMetadata<>(
+                    topic,
+                    String.class,
+                    String.class,
+                    new StringSerializer(),
+                    new StringSerializer());
+            Properties props = new Properties();
+            props.put("linger.ms", "1000");
+            ProducerFactoryBean<String, String> producer = new ProducerFactoryBean<>(producerMetadata, this.kafkaProperties.getBroker(), props);
+            ProducerConfiguration<String, String> config = new ProducerConfiguration<>(producerMetadata, producer.getObject());
+            producerConfigurationMap.put(topic, config) ;
+        }
+        kafkaProducerContext.setProducerConfigurations(producerConfigurationMap);
+        return kafkaProducerContext;
     }
 }

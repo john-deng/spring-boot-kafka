@@ -23,7 +23,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import static org.apache.kafka.common.utils.Utils.sleep;
+import static java.lang.Thread.sleep;
+
 
 /**
  * @author John Deng
@@ -42,14 +43,24 @@ public class Application {
 
         KafkaMessageQueue mq = new KafkaMessageQueue(context);
 
-        for (int i = 0; i < 10000; i++) {
-            String message = "the message from demo1 to kafka, count: " + i;
-            String response = mq.send(message, 1000);
-            logger.info("sent: " + message);
+        String message = null;
+        String response = null;
+        for (int i = 0; i < 10; i++) {
+            message = "the message a from demo1 to demo2, count: " + i;
+            response = mq.send("demo1.to.demo2", "demo2.to.demo1", "test.key", message, 0);
+            logger.info(message);
             if (null != response) {
-                logger.info("received: " + response);
+                logger.info("received from demo2: " + response);
             }
-            sleep(100L);
+            sleep(10L);
+
+            message = "the message b from demo1 to demo3, count: " + i;
+            response = mq.send("demo1.to.demo3", "demo3.to.demo1", "test.key", message, 0);
+            logger.info(message);
+            if (null != response) {
+                logger.info("received from demo3: " + response);
+            }
+            sleep(10L);
         }
 
         context.close();

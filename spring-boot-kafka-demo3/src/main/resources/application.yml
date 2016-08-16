@@ -6,6 +6,6 @@ kafka:
   timeout: 1000
   topics:
     producers:
-      - demo2.to.demo1
+      - demo3.to.demo1
     consumers:
-      - demo1.to.demo2
+      - demo1.to.demo3

@@ -1,9 +1,13 @@
 
 kafka:
-  broker: localhost:9092
-  zookeeper: localhost:2181
-  key: si.key
+  broker: 172.16.5.25:9092
+  zookeeper: 172.16.5.25:2181
   group: si.group
+  timeout: 1000
   topics:
-    producer: demo1.to.kafka
-    consumer: demo2.to.kafka
+    producers:
+      - demo1.to.demo2
+      - demo1.to.demo3
+    consumers:
+      - demo2.to.demo1
+      - demo3.to.demo1

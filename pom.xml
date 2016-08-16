@@ -8,7 +8,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
         <version>1.4.0.RELEASE</version>
-		<!-- <relativePath/>  -->
+		 <relativePath/>
 	</parent>
 
 	<groupId>cn.vpclub</groupId>
@@ -30,6 +30,7 @@
         <module>spring-boot-starter-kafka</module>
         <module>spring-boot-kafka-demo1</module>
         <module>spring-boot-kafka-demo2</module>
+        <module>spring-boot-kafka-demo3</module>
     </modules>
 
 

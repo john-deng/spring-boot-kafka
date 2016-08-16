@@ -2,6 +2,8 @@ package cn.vpclub.spring.boot.kafka.autoconfigure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.List;
+
 /**
  * Configuration properties for Spring Boot Kafka.
  *
@@ -24,6 +26,8 @@ public class KafkaProperties {
     private String broker;
 
     private String zookeeper;
+
+    private long timeout;
 
     public String getKey() {
         return key;
@@ -65,27 +69,36 @@ public class KafkaProperties {
         this.group = group;
     }
 
+    public long getTimeout() {
+        return timeout;
+    }
+
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
+    }
+
     @ConfigurationProperties(prefix = "topics")
     public class Topics {
 
-        private String producer;
+        private List<String> producers;
 
-        private String consumer;
+        private List<String> consumers;
 
-        public String getProducer() {
-            return producer;
+
+        public List<String> getProducers() {
+            return producers;
         }
 
-        public void setProducer(String producer) {
-            this.producer = producer;
+        public void setProducers(List<String> producers) {
+            this.producers = producers;
         }
 
-        public String getConsumer() {
-            return consumer;
+        public List<String> getConsumers() {
+            return consumers;
         }
 
-        public void setConsumer(String consumer) {
-            this.consumer = consumer;
+        public void setConsumers(List<String> consumers) {
+            this.consumers = consumers;
         }
     };
 

@@ -21,7 +21,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 		<spring.integration.version>4.3.0.RELEASE</spring.integration.version>
-		<spring.integration.kafka.version>2.0.0.RELEASE</spring.integration.kafka.version>
+		<spring.integration.kafka.version>1.2.1.RELEASE</spring.integration.kafka.version>
 		<spring.kafka.test.version>1.0.1.RELEASE</spring.kafka.test.version>
 	</properties>
 
@@ -47,12 +47,12 @@
 			<version>${spring.integration.kafka.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.integration</groupId>
-			<artifactId>spring-integration-core</artifactId>
-			<version>${spring.integration.version}</version>
-			<scope>compile</scope>
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.springframework.integration</groupId>-->
+			<!--<artifactId>spring-integration-core</artifactId>-->
+			<!--<version>${spring.integration.version}</version>-->
+			<!--<scope>compile</scope>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>

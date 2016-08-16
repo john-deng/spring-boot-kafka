@@ -1,22 +1,15 @@
 package cn.vpclub.spring.boot.kafka.autoconfigure;
 
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.kafka.inbound.KafkaMessageDrivenChannelAdapter;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
-import org.springframework.kafka.listener.config.ContainerProperties;
-import org.springframework.kafka.support.TopicPartitionInitialOffset;
-import org.springframework.messaging.PollableChannel;
+import org.springframework.integration.kafka.serializer.common.StringDecoder;
+import org.springframework.integration.kafka.support.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by johnd on 8/9/16.
@@ -30,40 +23,46 @@ public class KafkaConsumerAutoConfiguration {
     private KafkaProperties kafkaProperties;
 
     @Bean
-    public KafkaMessageListenerContainer<String, String> container() throws Exception {
-        return new KafkaMessageListenerContainer<>(
-                consumerFactory(),
-                new ContainerProperties(new TopicPartitionInitialOffset(this.kafkaProperties.getTopics().getConsumer(), 0)));
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    Map<String, ConsumerConfiguration> consumerConfigurations() {
+        Map<String, ConsumerConfiguration> map = new HashMap<>();
+
+        for (String topic: this.kafkaProperties.getTopics().getConsumers()) {
+
+            TopicCreator topicCreator = new TopicCreator(topic, this.kafkaProperties.getZookeeper());
+
+            Properties properties = new Properties();
+            properties.put("zookeeper.connect", this.kafkaProperties.getZookeeper());
+            properties.put("group.id", "foo");
+
+            ConsumerConnectionProvider consumerConnectionProvider = new ConsumerConnectionProvider(new kafka.consumer.ConsumerConfig(properties));
+
+            MessageLeftOverTracker messageLeftOverTracker = new MessageLeftOverTracker();
+
+            Map<String, Integer> topicStreamMap = new HashMap<>();
+            topicStreamMap.put(topic, 1);
+
+            ConsumerMetadata consumerMetadata = new ConsumerMetadata();
+            consumerMetadata.setGroupId("group.foo");
+            consumerMetadata.setValueDecoder(new StringDecoder());
+            consumerMetadata.setKeyDecoder(new StringDecoder());
+            consumerMetadata.setTopicStreamMap(topicStreamMap);
+
+            ConsumerConfiguration consumerConfiguration = new ConsumerConfiguration(
+                    consumerMetadata,
+                    consumerConnectionProvider,
+                    messageLeftOverTracker);
+
+            map.put(topic, consumerConfiguration);
+        }
+
+        return map;
     }
 
     @Bean
-    public ConsumerFactory<String, String> consumerFactory() {
-        Map<String, Object> props = new HashMap<String, Object>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, this.kafkaProperties.getBroker());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, this.kafkaProperties.getGroup());
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
-        props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, 100);
-        props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 15000);
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        return new DefaultKafkaConsumerFactory<>(props);
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    KafkaConsumerContext consumerContext() {
+        return new KafkaConsumerContext();
     }
 
-    @Bean
-    public KafkaMessageDrivenChannelAdapter<String, String> adapter(KafkaMessageListenerContainer<String, String> container) {
-        KafkaMessageDrivenChannelAdapter<String, String> kafkaMessageDrivenChannelAdapter =
-                new KafkaMessageDrivenChannelAdapter<String, String>(container);
-        kafkaMessageDrivenChannelAdapter.setOutputChannel(fromKafka());
-        return kafkaMessageDrivenChannelAdapter;
-    }
-
-    @Bean
-    public PollableChannel fromKafka() {
-        return new QueueChannel();
-    }
-
-    @Bean
-    public TopicCreator topicCreator() {
-        return new TopicCreator(this.kafkaProperties.getTopics().getConsumer(), this.kafkaProperties.getZookeeper());
-    }
 }

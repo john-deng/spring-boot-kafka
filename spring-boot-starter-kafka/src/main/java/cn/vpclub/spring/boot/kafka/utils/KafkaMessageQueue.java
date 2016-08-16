@@ -1,71 +1,125 @@
 package cn.vpclub.spring.boot.kafka.utils;
 
+import cn.vpclub.spring.boot.kafka.autoconfigure.KafkaProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.integration.support.MessageBuilder;
-import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.integration.kafka.support.ConsumerConfiguration;
+import org.springframework.integration.kafka.support.KafkaConsumerContext;
+import org.springframework.integration.kafka.support.KafkaProducerContext;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.PollableChannel;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * KafkaMessageHandler
  * Created by johnd on 8/10/16.
  */
 @Component
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class KafkaMessageQueue {
+    static Logger logger = LoggerFactory.getLogger(KafkaMessageQueue.class);
 
-    private PollableChannel receiver;
-
-    private MessageChannel sender;
+    @Autowired
+    private KafkaProperties kafkaProperties;
 
     private ApplicationContext appContext;
 
+    private KafkaProducerContext producerContext;
+
+    private KafkaConsumerContext consumerContext;
+
+    Map<String, ConsumerConfiguration> consumerConfigurations;
+
+    private ExecutorService executorService;
+
     public KafkaMessageQueue(ApplicationContext appContext) {
         this.appContext = appContext;
-        this.sender = appContext.getBean("toKafka", MessageChannel.class);
-        this.receiver = appContext.getBean("fromKafka", PollableChannel.class);
+        this.producerContext = appContext.getBean("producerContext", KafkaProducerContext.class);
+        this.consumerContext = appContext.getBean("consumerContext", KafkaConsumerContext.class);
+        this.consumerConfigurations = appContext.getBean("consumerConfigurations", HashMap.class);
+        this.executorService = Executors.newCachedThreadPool();
     }
 
-    public String send(String message, long timeout) {
-        String response = null;
+    public String send(String producerTopic, String consumerTopic, String key, String payload, long timeout) {
 
-        sender.send(new GenericMessage<String>(message));
-        if (0 != timeout) {
-            response = receive(timeout);
-        }
+        producerContext.send(producerTopic, key, payload);
 
-        return response;
-    }
+        if (null != consumerTopic) {
 
-    public String send(String message) {
-        return send(message, 0);
-    }
+//            if (0 == timeout) {
+//                return receive(consumerTopic);
+//            }
 
-    public String send(String topic, String payload, long timeout) {
-        String response = null;
-        Message<?> message = MessageBuilder.withPayload(payload)
-                .setHeader(KafkaHeaders.TOPIC, topic)
-                .build();
-
-        sender.send(message);
-        if (0 != timeout) {
-            response = receive(timeout);
-        }
-
-        return response;
-    }
-
-    public String receive(long timeout) {
-
-        Message<?> received = receiver.receive(timeout);
-        if (null != received) {
-            String response = (String)received.getPayload();
-            return response;
+            return receive(consumerTopic, timeout);
         }
 
         return null;
     }
 
+    public String send(String producerTopic, String consumerTopic, String key, String payload) {
+        return send(producerTopic, consumerTopic, key, payload, 2000);
+    }
+
+    public String send(String producerTopic, String key, String payload) {
+        return send(producerTopic, null, key, payload, 2000);
+    }
+
+    public String receive(String topic) {
+
+        Message<?> r = null;
+
+        Map<String, ConsumerConfiguration> cfg = new HashMap<>();
+        cfg.clear();
+        cfg.put(topic, consumerConfigurations.get(topic));
+        consumerContext.setConsumerConfigurations(cfg);
+
+        while (null == r) {
+            r = consumerContext.receive();
+        }
+
+        return r.getPayload().toString();
+    }
+
+    public String receive(String topic, long timeout) {
+        List<String> results = new ArrayList<>();
+        results.clear();
+        CompletableFuture<Void> completableFuture = CompletableFuture.runAsync(() -> {
+
+            String r = receive(topic);
+
+            if (null != r) {
+                results.add(r);
+            }
+
+            System.out.println("async thread: " +  topic);
+        }, executorService);
+
+        boolean hasTimeout = (timeout > 0);
+        int retried = 0;
+        timeout /= 10;
+        while (!completableFuture.isDone() && (!hasTimeout || retried < timeout)) {
+            retried++;
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                logger.error(e.getMessage());
+            }
+        }
+
+        if (0 != results.size())
+        {
+            return results.get(0);
+        }
+
+        return null;
+    }
 }

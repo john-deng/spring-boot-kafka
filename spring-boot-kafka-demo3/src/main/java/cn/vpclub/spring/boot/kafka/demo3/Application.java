@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package cn.vpclub.spring.boot.kafka.demo2;
+package cn.vpclub.spring.boot.kafka.demo3;
 
 import cn.vpclub.spring.boot.kafka.utils.KafkaMessageQueue;
 import org.slf4j.Logger;
@@ -42,9 +42,9 @@ public class Application {
 
         KafkaMessageQueue kafkaMessageHandler = new KafkaMessageQueue(context);
         for (int i = 0; i < 10; i++) {
-            String response = kafkaMessageHandler.receive("demo1.to.demo2", 0);
+            String response = kafkaMessageHandler.receive("demo1.to.demo3", 0);
             if (null != response) {
-                kafkaMessageHandler.send("demo2.to.demo1", null, "test.key", "message replied from demo2", 0);
+                kafkaMessageHandler.send("demo3.to.demo1", null, "test.key", "message replied from demo3", 0);
             }
 
             logger.info("received: " + response);
