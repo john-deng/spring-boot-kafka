@@ -47,12 +47,6 @@
 			<version>${spring.integration.kafka.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		<!--<dependency>-->
-			<!--<groupId>org.springframework.integration</groupId>-->
-			<!--<artifactId>spring-integration-core</artifactId>-->
-			<!--<version>${spring.integration.version}</version>-->
-			<!--<scope>compile</scope>-->
-		<!--</dependency>-->
 		<dependency>
 			<groupId>org.springframework.kafka</groupId>
 			<artifactId>spring-kafka-test</artifactId>
@@ -99,4 +93,17 @@
 			<url>https://repo.spring.io/libs-milestone</url>
 		</repository>
 	</repositories>
+
+	<distributionManagement>
+		<repository>
+			<id>nexus-releases</id>
+			<name>Nexus Release Repository</name>
+			<url>http://172.16.0.2:8081/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>nexus-snapshots</id>
+			<name>Nexus Snapshot Repository</name>
+			<url>http://172.16.0.2:8081/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 </project>

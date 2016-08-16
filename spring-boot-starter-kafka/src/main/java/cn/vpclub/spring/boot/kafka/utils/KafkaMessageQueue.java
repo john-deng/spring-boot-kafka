@@ -54,11 +54,6 @@ public class KafkaMessageQueue {
         producerContext.send(producerTopic, key, payload);
 
         if (null != consumerTopic) {
-
-//            if (0 == timeout) {
-//                return receive(consumerTopic);
-//            }
-
             return receive(consumerTopic, timeout);
         }
 
