@@ -3,8 +3,10 @@ package cn.vpclub.spring.boot.kafka.utils;
 import cn.vpclub.spring.boot.kafka.autoconfigure.KafkaProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.integration.kafka.support.ConsumerConfiguration;
 import org.springframework.integration.kafka.support.KafkaConsumerContext;
 import org.springframework.integration.kafka.support.KafkaProducerContext;
@@ -25,7 +27,7 @@ import java.util.concurrent.Executors;
  */
 @Component
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class KafkaMessageQueue {
+public class KafkaMessageQueue implements ApplicationContextAware {
     static Logger logger = LoggerFactory.getLogger(KafkaMessageQueue.class);
 
     @Autowired
@@ -40,6 +42,11 @@ public class KafkaMessageQueue {
     Map<String, ConsumerConfiguration> consumerConfigurations;
 
     private ExecutorService executorService;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.appContext = applicationContext;
+    }
 
     public KafkaMessageQueue(ApplicationContext appContext) {
         this.appContext = appContext;

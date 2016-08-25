@@ -40,11 +40,11 @@ public class Application {
                 .web(false)
                 .run(args);
 
-        KafkaMessageQueue kafkaMessageHandler = new KafkaMessageQueue(context);
+        KafkaMessageQueue mq = new KafkaMessageQueue(context);
         for (int i = 0; i < 10; i++) {
-            String response = kafkaMessageHandler.receive("demo1.to.demo2", 0);
+            String response = mq.receive("demo1.to.demo2", 0);
             if (null != response) {
-                kafkaMessageHandler.send("demo2.to.demo1", null, "test.key", "message replied from demo2", 0);
+                mq.send("demo2.to.demo1", null, "test.key", "message replied from demo2", 0);
             }
 
             logger.info("received: " + response);
